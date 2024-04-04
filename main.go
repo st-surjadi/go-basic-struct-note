@@ -7,10 +7,23 @@ import (
 	"strings"
 
 	"example.com/go-basic-struct-note/note"
+	"example.com/go-basic-struct-note/todo"
 )
+
+type saver interface {
+	Save() error
+}
 
 func main() {
 	noteTitle, noteContent := getNoteData()
+	todoText := getUserInput("Todo text: ")
+
+	todo, err := todo.New(todoText)
+
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 
 	userNote, err := note.New(noteTitle, noteContent)
 
@@ -19,13 +32,17 @@ func main() {
 		return
 	}
 
-	userNote.Display()
-
-	err = userNote.Save()
+	todo.Display()
+	err = saveData(todo)
 	if err != nil {
-		fmt.Println("Saving the note is failed!")
+		return
 	}
-	fmt.Println("Saving the note is successful!")
+
+	userNote.Display()
+	err = saveData(userNote)
+	if err != nil {
+		return
+	}
 }
 
 func getUserInput(promptText string) string {
@@ -49,4 +66,13 @@ func getNoteData() (string, string) {
 	content := getUserInput("Note content: ")
 
 	return title, content
+}
+
+func saveData(data saver) error {
+	err := data.Save()
+	if err != nil {
+		return err
+	}
+	fmt.Println("Saving data is successful!")
+	return nil
 }
